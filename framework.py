@@ -89,7 +89,7 @@ class FrameWork():
             if summed_swap_dist < min_swap_distance:
                 best_ranking = ranking
                 min_swap_distance = summed_swap_dist
-        return true_ranking == ranking
+        return true_ranking == best_ranking
 
     def run_MLEs(self, iterations: int):
         all_possible_rankings = list(itertools.permutations(self.candidates))
@@ -113,7 +113,7 @@ class Representative():
         self.did_delegate = self.voter != representative
         if self.did_delegate:
             final_representative = all_representatives[representative].end_point
-            if final_representative != voter:
+            if final_representative != self.voter:
                 all_representatives[final_representative].votes += self.votes
                 self.end_point = final_representative
             self.votes = 0
