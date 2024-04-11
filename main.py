@@ -1,16 +1,25 @@
 from delegation import SelfDelegation
 from delegation import HighestDelegation
 from delegation import RandomApprovedNeighborDelegation
-from delegation import RandomMoreApprovedNeighborDelegation
+from delegation import RandomMoreApprovedNeighborsDelegation
 from delegation import SingleApprovedNeighbourDelegation
+from delegation import LocalStrictlyUpwardDelegation
+from delegation import LocalConfidenceBasedDelegation
+from delegation import LocalCountinousDelegation
 from framework import FrameWork
+import random
 
 if __name__ == "__main__":
-    #delegation = SelfDelegation()
-    #delegation = HighestDelegation()
-    delegation = SingleApprovedNeighbourDelegation()
-    #framework = FrameWork("star", 3, "random", delegation)
-    framework = FrameWork("star", 5, {0: 0.9, 1: 0.1, 2: 0.1, 3: 0.1, 4: 0.8}, delegation)
-    total_runs = 10
-    correct_runs = framework.run_MLEs(total_runs)
-    print(f"{correct_runs} out of {total_runs}, were correct which gives an accuracy of {(correct_runs/total_runs*100.0):.3}")
+    
+    delegation_list = [ HighestDelegation(), RandomApprovedNeighborDelegation(), RandomMoreApprovedNeighborsDelegation(), SingleApprovedNeighbourDelegation(), LocalStrictlyUpwardDelegation(), LocalConfidenceBasedDelegation(), LocalCountinousDelegation()]
+    voters_list = [5, 10]
+    total_runs = 1000
+    
+    for delegation in delegation_list:
+        for voters in voters_list:
+        # genetate the random proficiencies for the voters
+            voters_proficiencies = {voter: random.uniform(0.5, 1.0) for voter in range(voters)}
+            baseline_delegation = FrameWork("star", voters, voters_proficiencies, SelfDelegation())
+            test_delegation  = FrameWork("star", voters, voters_proficiencies, delegation)
+            gain = (test_delegation.run_MLEs(total_runs) - baseline_delegation.run_MLEs(total_runs)) / total_runs * 100.0
+            print(f"Delegation: {delegation.__class__.__name__}, Voters: {voters}, Gain: {gain:.3}")
