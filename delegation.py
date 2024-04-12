@@ -14,7 +14,7 @@ class Delegation():
         pass
 
     
-    def approve_neighbors(self, own_proficiency: tuple[int, float], neighbor_proficiencies: dict[int, float], alpha = 0.15) -> dict[int, bool]:
+    def approve_neighbors(self, own_proficiency: tuple[int, float], neighbor_proficiencies: dict[int, float], alpha = 0.1) -> dict[int, bool]:
         approved_neighbors = dict()
         for neighbor, proficiency in neighbor_proficiencies.items():
             if proficiency >= own_proficiency[1] + alpha:
@@ -92,20 +92,27 @@ class SingleApprovedNeighbourDelegation(Delegation):
     
     
 class LocalStrictlyUpwardDelegation(Delegation):
-    # If the voter delegates, it will delegate to an approved neighbor chosen uniformly at random, otherwise it will delegate to itself
+    # If the voter delegates, it will delegate to a neighbor chosen uniformly at random, otherwise it will delegate to itself
             
     def delegation_chances(self, own_proficiency: tuple[int, float], neighbor_proficiencies: dict[int, float]) -> dict[int, float]:
-        approved_neighbors = super().approve_neighbors(own_proficiency, neighbor_proficiencies)
         delegation = random.choices([0, 1], weights = [1 - self.exogenous_probability, self.exogenous_probability])[0]
-        delegation_probs = {voter:0.0 for voter in neighbor_proficiencies}
-        if delegation == 0:  
+        # approved_neighbors = super().approve_neighbors(own_proficiency, neighbor_proficiencies)
+        # delegation_probs = {voter:0.0 for voter in neighbor_proficiencies}
+        # if delegation == 0:  
+        #     delegation_probs[own_proficiency[0]] = 1.0
+        # else:
+        #     approved_neighbors = super().approve_neighbors(own_proficiency, neighbor_proficiencies)
+        #     if len(approved_neighbors) != 0:
+        #         for neighbor in approved_neighbors:
+        #             delegation_probs[neighbor] = 1.0
+        #     else:
+        #         delegation_probs[own_proficiency[0]] = 1.0
+        if delegation == 0:
+            delegation_probs = {voter:0.0 for voter in neighbor_proficiencies}  
             delegation_probs[own_proficiency[0]] = 1.0
         else:
-            if len(approved_neighbors) != 0:
-                for neighbor in approved_neighbors:
-                    delegation_probs[neighbor] = 1.0
-            else:
-                delegation_probs[own_proficiency[0]] = 1.0
+            delegation_probs = {voter:1.0 for voter in neighbor_proficiencies}
+            delegation_probs[own_proficiency[0]] = 0.0
         return delegation_probs
     
     
